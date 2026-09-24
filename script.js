@@ -719,19 +719,39 @@ async function uploadToR2Worker(file, onProgress) {
     workerUrl = 'https://' + workerUrl;
   }
 
+  // Batas ukuran Cloudflare Worker gratis (maksimum body request 95-100 MB)
+  const MAX_WORKER_UPLOAD_SIZE = 95 * 1024 * 1024;
+  if (file && file.size > MAX_WORKER_UPLOAD_SIZE) {
+    throw new Error(
+      `Ukuran file (${formatFileSize(file.size)}) melebihi batas upload langsung Worker (95 MB). ` +
+      `Silakan kompres video terlebih dahulu, atau unggah langsung melalui dashboard Cloudflare R2 lalu masukkan tautan URL publiknya di form ini.`
+    );
+  }
+
   // Minta HMAC token dari Vercel Serverless Function.
-  // Secret TIDAK pernah dikirim ke browser — hanya token waktu-terbatas (15 menit).
+  // Jika dibuka di lokal (file:// atau localhost), gunakan tokenApiUrl online dari supabase-config.js.
+  const isLocal = window.location.protocol === 'file:' || 
+                  window.location.hostname === 'localhost' || 
+                  window.location.hostname === '127.0.0.1';
+  const defaultTokenUrl = isLocal 
+    ? (window.PDD_SUPABASE_CONFIG?.tokenApiUrl || 'https://koleksirefahganteng.vercel.app/api/get-upload-token')
+    : '/api/get-upload-token';
+  const tokenEndpoint = window.PDD_SUPABASE_CONFIG?.tokenApiUrl || defaultTokenUrl;
+
   let uploadToken = null;
   try {
-    const tokenRes = await fetch('/api/get-upload-token', { method: 'POST' });
+    const tokenRes = await fetch(tokenEndpoint, { method: 'POST' });
     if (!tokenRes.ok) {
       const errData = await tokenRes.json().catch(() => ({}));
-      throw new Error(errData.error || `Gagal mendapat token upload (HTTP ${tokenRes.status})`);
+      throw new Error(errData.error || `HTTP ${tokenRes.status}`);
     }
     const tokenData = await tokenRes.json();
     uploadToken = tokenData.token;
   } catch (err) {
-    throw new Error(`Gagal menghubungi server token: ${err.message}`);
+    throw new Error(
+      `Gagal menghubungi server token (${err.message}). ` +
+      `Pastikan koneksi internet aktif, atau jika membuka secara lokal pastikan terhubung ke internet.`
+    );
   }
 
   if (!uploadToken) {
@@ -772,7 +792,12 @@ async function uploadToR2Worker(file, onProgress) {
       }
     });
 
-    request.addEventListener('error', () => reject(new Error('Koneksi upload ke Cloudflare Worker terputus. Pastikan CORS diizinkan dan URL benar.')));
+    request.addEventListener('error', () => {
+      reject(new Error(
+        'Koneksi upload ke Cloudflare Worker terputus. ' +
+        'Kemungkinan penyebab: ukuran file melebihi limit (maks 95MB), ekstensi adblock/antivirus memblokir domain worker, atau koneksi internet terputus.'
+      ));
+    });
     request.addEventListener('abort', () => reject(new Error('Upload dibatalkan.')));
     request.send(formData);
   });
