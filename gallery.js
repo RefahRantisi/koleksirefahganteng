@@ -680,44 +680,53 @@
     });
   }
 
-  /* ── Animated Mesh Background (Dashboard) ──────────────────── */
+  /* ── Animated Mesh Background (Gallery)
+     Optimasi Android: viewport canvas, 30fps mobile, blob lebih kecil. ── */
   function initMesh() {
     const canvas = document.getElementById('mesh-canvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const colours = [[99,60,219],[244,114,182],[56,189,248],[167,139,250],[52,211,153]];
-    const blobs = Array.from({ length: 6 }, (_, i) => ({
+    const isMobile = window.innerWidth < 768;
+    const blobs = Array.from({ length: isMobile ? 4 : 6 }, (_, i) => ({
       x: Math.random() * window.innerWidth,
-      y: Math.random() * document.body.scrollHeight,
-      vx: (Math.random() - 0.5) * 0.8, vy: (Math.random() - 0.5) * 0.6,
-      r: 260 + Math.random() * 340, colour: colours[i % colours.length],
-      phase: Math.random() * Math.PI * 2, speed: 0.004 + Math.random() * 0.004,
+      y: Math.random() * window.innerHeight,
+      vx: (Math.random() - 0.5) * (isMobile ? 0.4 : 0.8),
+      vy: (Math.random() - 0.5) * (isMobile ? 0.3 : 0.6),
+      r: isMobile ? (110 + Math.random() * 110) : (260 + Math.random() * 340),
+      colour: colours[i % colours.length],
+      phase: Math.random() * Math.PI * 2, speed: 0.003 + Math.random() * 0.003,
     }));
     function resize() {
       canvas.width = window.innerWidth;
-      canvas.height = document.body.scrollHeight || window.innerHeight;
+      canvas.height = window.innerHeight; // viewport only
     }
     resize();
     window.addEventListener('resize', resize, { passive: true });
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const frameBudget = isMobile ? 33 : 0;
+    let lastT = 0;
+    function draw(t) {
+      requestAnimationFrame(draw);
+      if (t - lastT < frameBudget) return;
+      lastT = t;
+      ctx.fillStyle = 'rgba(6,6,16,0.3)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
       blobs.forEach(b => {
         b.phase += b.speed;
-        b.x += b.vx + Math.sin(b.phase) * 0.6;
-        b.y += b.vy + Math.cos(b.phase * 0.7) * 0.5;
+        b.x += b.vx + Math.sin(b.phase) * 0.5;
+        b.y += b.vy + Math.cos(b.phase * 0.7) * 0.4;
         if (b.x < -b.r) b.x = canvas.width + b.r;
         if (b.x > canvas.width + b.r) b.x = -b.r;
         if (b.y < -b.r) b.y = canvas.height + b.r;
         if (b.y > canvas.height + b.r) b.y = -b.r;
         const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
-        g.addColorStop(0, `rgba(${b.colour.join(',')},0.16)`);
+        g.addColorStop(0, `rgba(${b.colour.join(',')},0.14)`);
         g.addColorStop(1, `rgba(${b.colour.join(',')},0)`);
         ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
         ctx.fillStyle = g; ctx.fill();
       });
-      requestAnimationFrame(draw);
     }
-    draw();
+    requestAnimationFrame(draw);
   }
 
   /* ── Bootstrap ────────────────────────────────────────────── */

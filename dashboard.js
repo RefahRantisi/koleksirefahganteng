@@ -6,10 +6,12 @@
 (function () {
   'use strict';
 
-  /* ══ 1. ANIMATED MESH CANVAS ══════════════════════════════════
-     Draws flowing colour blobs on canvas that move across the
-     ENTIRE page height — not just the top viewport.
-  ══════════════════════════════════════════════════════════════ */
+  /* ══ 1. ANIMATED MESH CANVAS ═════════════════════════════════
+     Optimasi Android Chrome:
+     - Canvas = viewport height saja (scrollHeight bisa 10.000px di Android)
+     - Throttle 30fps (Android GPU tidak perlu 60fps untuk background blur)
+     - Blob lebih sedikit & kecil di layar mobile
+  ═════════════════════════════════════════════════════════════ */
   function initMesh() {
     const canvas = document.getElementById('mesh-canvas');
     if (!canvas) return;
@@ -23,42 +25,56 @@
       [52, 211, 153],   // emerald
     ];
 
-    // Create blob nodes
-    const blobs = Array.from({ length: 7 }, (_, i) => ({
+    // Mobile = 4 blob kecil, Desktop = 7 blob
+    const isMobile = window.innerWidth < 768;
+    const blobCount = isMobile ? 4 : 7;
+    const blobR     = isMobile ? 160 + Math.random() * 140 : 280 + Math.random() * 380;
+
+    const blobs = Array.from({ length: blobCount }, (_, i) => ({
       x: Math.random() * window.innerWidth,
-      y: Math.random() * document.body.scrollHeight,
-      vx: (Math.random() - 0.5) * 0.8,
-      vy: (Math.random() - 0.5) * 0.6,
-      r: 280 + Math.random() * 380,
+      y: Math.random() * window.innerHeight,
+      vx: (Math.random() - 0.5) * (isMobile ? 0.4 : 0.8),
+      vy: (Math.random() - 0.5) * (isMobile ? 0.3 : 0.6),
+      r: isMobile ? (120 + Math.random() * 120) : (280 + Math.random() * 380),
       colour: colours[i % colours.length],
       phase: Math.random() * Math.PI * 2,
-      speed: 0.004 + Math.random() * 0.004,
+      speed: 0.003 + Math.random() * 0.003,
     }));
 
     function resize() {
       canvas.width  = window.innerWidth;
-      canvas.height = document.body.scrollHeight || window.innerHeight;
+      // viewport height saja — bukan scrollHeight!
+      // scrollHeight bisa 8000px+ dan membuat Android render canvas raksasa
+      canvas.height = window.innerHeight;
     }
     resize();
     window.addEventListener('resize', resize, { passive: true });
 
-    let frame = 0;
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Throttle: 30fps di mobile (33ms), 60fps di desktop (0ms skip)
+    const frameBudget = isMobile ? 33 : 0;
+    let lastT = 0;
+    function draw(t) {
+      requestAnimationFrame(draw);
+      if (t - lastT < frameBudget) return;
+      lastT = t;
+
+      // fillRect fade lebih ringan dari clearRect pada canvas besar
+      ctx.fillStyle = 'rgba(6,6,16,0.3)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       blobs.forEach(b => {
         b.phase += b.speed;
-        b.x += b.vx + Math.sin(b.phase) * 0.6;
-        b.y += b.vy + Math.cos(b.phase * 0.7) * 0.5;
+        b.x += b.vx + Math.sin(b.phase) * 0.5;
+        b.y += b.vy + Math.cos(b.phase * 0.7) * 0.4;
 
-        // Wrap around
+        // Wrap di dalam viewport
         if (b.x < -b.r) b.x = canvas.width + b.r;
         if (b.x > canvas.width + b.r) b.x = -b.r;
         if (b.y < -b.r) b.y = canvas.height + b.r;
         if (b.y > canvas.height + b.r) b.y = -b.r;
 
         const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
-        g.addColorStop(0, `rgba(${b.colour.join(',')},0.18)`);
+        g.addColorStop(0, `rgba(${b.colour.join(',')},0.16)`);
         g.addColorStop(1, `rgba(${b.colour.join(',')},0)`);
 
         ctx.beginPath();
@@ -66,11 +82,8 @@
         ctx.fillStyle = g;
         ctx.fill();
       });
-
-      frame++;
-      requestAnimationFrame(draw);
     }
-    draw();
+    requestAnimationFrame(draw);
   }
 
   /* ══ 2. FLOATING NAV — sliding pill indicator ═════════════════
@@ -281,32 +294,29 @@
     new MutationObserver(staggerCards).observe(grid, { childList: true });
   }
 
-  /* ══ 6. PARALLAX — photo & orbs on scroll ══════════════════════ */
+  /* ══ 6. PARALLAX — foto hero saja, bukan orbs ══════════════════════
+     Orbs sudah bergerak via CSS @keyframes orbDrift.
+     Kalau JS juga scroll-parallax orbs di atas CSS animation = double GPU paint,
+     sangat berat di Android. Cukup parallax foto hero saja. */
   function initParallax() {
     const photo = document.getElementById('hero-photo-bg');
-    const orbs  = document.querySelectorAll('.orb');
-    if (!photo && !orbs.length) return;
+    if (!photo) return;
 
     let ticking = false;
     window.addEventListener('scroll', () => {
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(() => {
-        const sy = window.scrollY;
-        if (photo) {
-          photo.style.backgroundPositionY = `calc(center + ${sy * 0.2}px)`;
-        }
-        orbs.forEach((orb, i) => {
-          const factor = 0.06 + i * 0.025;
-          const dir    = i % 2 === 0 ? 1 : -1;
-          orb.style.transform = `translateY(${sy * factor * dir}px)`;
-        });
+        photo.style.backgroundPositionY = `calc(center + ${window.scrollY * 0.15}px)`;
         ticking = false;
       });
     }, { passive: true });
   }
 
-  /* ══ 7. MOUSE GLOW FOLLOWING CURSOR ═══════════════════════════ */
+  /* ══ 7. MOUSE GLOW FOLLOWING CURSOR ═══════════════════════════
+     Hanya untuk desktop (pointer: fine).
+     Pakai transform:translate3d — GPU composite layer, TIDAK memicu
+     layout reflow seperti style.left/top. */
   function initCursorGlow() {
     if (!window.matchMedia('(pointer: fine)').matches) return;
 
@@ -315,22 +325,24 @@
       'position:fixed', 'pointer-events:none', 'z-index:9999',
       'width:350px', 'height:350px', 'border-radius:50%',
       'background:radial-gradient(circle,rgba(167,139,250,0.07) 0%,transparent 70%)',
-      'transform:translate(-50%,-50%)',
-      'will-change:left,top',
-      'transition:left 0.12s ease,top 0.12s ease',
+      'top:0', 'left:0',            // anchor di pojok, gerak via transform
+      'will-change:transform',       // buat GPU layer terpisah
     ].join(';');
     document.body.appendChild(glow);
 
-    let mx = 0, my = 0, gx = 0, gy = 0;
+    let mx = -500, my = -500, gx = -500, gy = -500;
     document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; }, { passive: true });
 
-    (function loop() {
+    let lastT = 0;
+    (function loop(t) {
+      requestAnimationFrame(loop);
+      if (t - lastT < 32) return; // 30fps cukup untuk glow
+      lastT = t;
       gx += (mx - gx) * 0.09;
       gy += (my - gy) * 0.09;
-      glow.style.left = gx + 'px';
-      glow.style.top  = gy + 'px';
-      requestAnimationFrame(loop);
-    })();
+      // translate3d: zero layout cost, GPU handles it
+      glow.style.transform = `translate3d(${gx - 175}px,${gy - 175}px,0)`;
+    })(0);
   }
 
   /* ══ 8. GLASS CARD INNER GLOW on hover ═════════════════════════ */
@@ -411,21 +423,27 @@
     }, { passive: true });
   }
 
-  /* ══ 10. FLOATING PARTICLES across full page ══════════════════ */
+  /* ══ 10. FLOATING PARTICLES ══════════════════════════════════════
+     Mobile/Android: 0 partikel. CSS orbs sudah memberikan ambient motion.
+     Partikel di mobile (dengan boxShadow glow) = sumber lag utama.
+     Desktop: 8 partikel tanpa boxShadow (ringan). */
   function initParticles() {
+    // Touch device (HP) = skip, CSS orbs sudah cukup
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+
     const body = document.body;
-    const count = window.innerWidth > 700 ? 18 : 7;
+    const count = 8;
     const colours = ['rgba(167,139,250,', 'rgba(244,114,182,', 'rgba(56,189,248,', 'rgba(52,211,153,'];
 
     for (let i = 0; i < count; i++) {
       const p   = document.createElement('div');
-      const sz  = 1.5 + Math.random() * 3.5;
+      const sz  = 2 + Math.random() * 3;
       const col = colours[Math.floor(Math.random() * colours.length)];
-      const op  = (0.3 + Math.random() * 0.5).toFixed(2);
+      const op  = (0.25 + Math.random() * 0.4).toFixed(2);
       const x   = Math.random() * 100;
-      const y   = Math.random() * 300; // spread across 3x viewport height
-      const dur = 12 + Math.random() * 20;
-      const del = Math.random() * 10;
+      const y   = Math.random() * 100;
+      const dur = 15 + Math.random() * 20;
+      const del = Math.random() * 8;
 
       Object.assign(p.style, {
         position: 'fixed',
@@ -435,7 +453,8 @@
         left: x + 'vw', top: y + 'vh',
         pointerEvents: 'none',
         zIndex: '0',
-        boxShadow: `0 0 ${sz * 5}px ${col}0.5)`,
+        // boxShadow dihapus: tiap frame browser repaint shadow = lag di mobile
+        willChange: 'transform',
         animation: `orbDrift ${dur}s ease-in-out ${del}s infinite`,
       });
       body.appendChild(p);

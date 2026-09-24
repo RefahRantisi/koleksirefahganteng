@@ -424,3 +424,19 @@
 @media (max-width: 480px) {
   .gallery-grid { grid-template-columns: 1fr; }
 }
+
+/* Mobile performance override (gallery.html) */
+@media (pointer: coarse) {
+  .db-nav__inner {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(8, 8, 22, 0.95);
+  }
+  .orb { filter: blur(40px); }
+  .orb-1 { width: 360px; height: 360px; }
+  .orb-2 { width: 280px; height: 280px; }
+  .orb-3 { width: 240px; height: 240px; }
+  .orb-4, .orb-5 { display: none; }
+  .grain-overlay { display: none; }
+  #mesh-canvas { opacity: 0.45; }
+}

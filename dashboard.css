@@ -1,16 +1,16 @@
-/* ============================================================
-   dashboard.css — Full iPhone Glassmorphism Portfolio
+﻿/* ============================================================
+   dashboard.css â€” Full iPhone Glassmorphism Portfolio
    Layout, animations, and glass components for index.html
    ============================================================ */
 
-/* ── PAGE BASE ──────────────────────────────────────────────── */
+/* â”€â”€ PAGE BASE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .db-page {
   min-height: 100vh;
   overflow-x: hidden;
   font-family: 'Inter', sans-serif;
 }
 
-/* ── ANIMATED MESH BACKGROUND ────────────────────────────────── */
+/* â”€â”€ ANIMATED MESH BACKGROUND â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .mesh-bg {
   position: fixed;
   inset: 0;
@@ -31,36 +31,31 @@
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
+  filter: blur(60px);
   animation: orbDrift linear infinite;
   will-change: transform;
 }
-.orb-1 {
-  width: 900px; height: 900px;
+.orb-1 { width: 650px; height: 650px;
   background: radial-gradient(circle, rgba(99,60,219,0.28) 0%, transparent 65%);
   top: -300px; left: -200px;
   animation-duration: 38s;
 }
-.orb-2 {
-  width: 700px; height: 700px;
+.orb-2 { width: 520px; height: 520px;
   background: radial-gradient(circle, rgba(244,114,182,0.22) 0%, transparent 65%);
   bottom: -250px; right: -150px;
   animation-duration: 28s; animation-delay: -9s;
 }
-.orb-3 {
-  width: 600px; height: 600px;
+.orb-3 { width: 440px; height: 440px;
   background: radial-gradient(circle, rgba(56,189,248,0.18) 0%, transparent 65%);
   top: 35%; left: 45%;
   animation-duration: 45s; animation-delay: -18s;
 }
-.orb-4 {
-  width: 450px; height: 450px;
+.orb-4 { width: 330px; height: 330px;
   background: radial-gradient(circle, rgba(167,139,250,0.2) 0%, transparent 65%);
   top: 65%; left: 5%;
   animation-duration: 33s; animation-delay: -6s;
 }
-.orb-5 {
-  width: 380px; height: 380px;
+.orb-5 { width: 280px; height: 280px;
   background: radial-gradient(circle, rgba(52,211,153,0.14) 0%, transparent 65%);
   top: 20%; right: 5%;
   animation-duration: 52s; animation-delay: -24s;
@@ -86,11 +81,11 @@
 /* Film-grain noise texture */
 .grain-overlay {
   position: absolute;
-  inset: -50%;
-  width: 200%; height: 200%;
+  inset: 0;
+  /* static grain */
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E");
   opacity: 0.035;
-  animation: grainShift 0.5s steps(1) infinite;
+  /* animation dihapus: berat di Android Chrome */
   pointer-events: none;
 }
 
@@ -102,11 +97,11 @@
   100% { transform: translate(2%, -1%); }
 }
 
-/* ── GLASS CARD COMPONENT ─────────────────────────────────────── */
+/* â”€â”€ GLASS CARD COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .glass-card {
   background: rgba(255,255,255,0.06);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
   border: 1px solid rgba(255,255,255,0.13);
   border-radius: 24px;
   box-shadow:
@@ -138,7 +133,7 @@
     0 1px 0 rgba(255,255,255,0.15) inset;
 }
 
-/* ── GLASS CHIP ───────────────────────────────────────────────── */
+/* â”€â”€ GLASS CHIP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .glass-chip {
   display: inline-flex;
   align-items: center;
@@ -156,7 +151,7 @@
   text-transform: uppercase;
 }
 
-/* ── GRADIENT TEXT ────────────────────────────────────────────── */
+/* â”€â”€ GRADIENT TEXT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .gradient-text {
   background: linear-gradient(135deg, #c4b5fd 0%, #f9a8d4 40%, #67e8f9 100%);
   -webkit-background-clip: text;
@@ -164,7 +159,7 @@
   background-clip: text;
 }
 
-/* ── FLOATING NAV ─────────────────────────────────────────────── */
+/* â”€â”€ FLOATING NAV â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .db-nav {
   position: fixed;
   top: 20px;
@@ -187,8 +182,8 @@
   justify-content: space-between;
   padding: 10px 16px 10px 12px;
   background: rgba(10,10,24,0.72);
-  backdrop-filter: blur(32px) saturate(200%);
-  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 100px;
   box-shadow:
@@ -241,7 +236,7 @@
 }
 
 /* Nav links */
-/* Nav links wrapper — relative so pill can position inside it */
+/* Nav links wrapper â€” relative so pill can position inside it */
 .db-links {
   display: flex;
   align-items: center;
@@ -249,11 +244,11 @@
   position: relative; /* pill uses this as offset parent */
 }
 
-/* ── SLIDING PILL INDICATOR ───────────────────────────────────
+/* â”€â”€ SLIDING PILL INDICATOR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    Absolutely positioned inside .db-links.
    JS sets left + width dynamically on every active change.
    cubic-bezier(0.34,1.56,0.64,1) = spring overshoot effect.
-   ────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .db-nav__pill {
   position: absolute;
   top: 0;
@@ -268,7 +263,7 @@
   opacity: 0;            /* JS fades it in after first position */
   pointer-events: none;
   z-index: 0;
-  /* Spring transition — pill stretches slightly during slide */
+  /* Spring transition â€” pill stretches slightly during slide */
   transition:
     left   0.42s cubic-bezier(0.34,1.56,0.64,1),
     width  0.42s cubic-bezier(0.34,1.56,0.64,1),
@@ -305,23 +300,23 @@
   font-weight: 500;
   color: rgba(255,255,255,0.6);
   text-decoration: none;
-  /* Remove background — pill handles the highlight */
+  /* Remove background â€” pill handles the highlight */
   transition: color 0.25s ease;
   white-space: nowrap;
 }
 .db-link:hover { color: rgba(255,255,255,0.95); }
 .db-link.active {
   color: #fff;
-  /* No background — pill indicator provides it */
+  /* No background â€” pill indicator provides it */
 }
 
-/* ── CONTAINER ────────────────────────────────────────────────── */
+/* â”€â”€ CONTAINER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .db-container {
   width: min(1160px, calc(100% - 48px));
   margin: 0 auto;
 }
 
-/* ── HERO ─────────────────────────────────────────────────────── */
+/* â”€â”€ HERO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .db-hero {
   min-height: 100vh;
   display: flex;
@@ -373,7 +368,7 @@
   justify-content: center;
 }
 
-/* Photo has background-image set via JS — hide placeholder */
+/* Photo has background-image set via JS â€” hide placeholder */
 .db-hero__photo[style*="background-image"] .db-hero__photo-placeholder {
   display: none;
 }
@@ -592,7 +587,7 @@
   0%, 100% { opacity: 0.6; } 50% { opacity: 1; }
 }
 
-/* ── ABOUT SECTION ────────────────────────────────────────────── */
+/* â”€â”€ ABOUT SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .db-about {
   padding: 80px 0 100px;
 }
@@ -658,7 +653,7 @@
 }
 .db-about__social .social-link span img { width: 12px; height: 12px; filter: brightness(0) invert(1); }
 
-/* ── PORTFOLIO SECTION ────────────────────────────────────────── */
+/* â”€â”€ PORTFOLIO SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .db-works {
   padding: 60px 0 120px;
 }
@@ -682,10 +677,10 @@
   letter-spacing: -0.025em;
 }
 
-/* ── DUAL-TIER FILTER SYSTEM ───────────────────────────────────
+/* â”€â”€ DUAL-TIER FILTER SYSTEM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    Tier 1: Kategori Media (Video Cloudflare R2 vs Foto Google Drive)
    Tier 2: Sub-kategori Tools (Menyesuaikan secara dinamis)
-   ─────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .db-filter-system {
   display: flex;
   flex-direction: column;
@@ -710,8 +705,8 @@
   gap: 4px;
   padding: 6px;
   background: rgba(10,10,24,0.65);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
   border: 1px solid rgba(255,255,255,0.11);
   border-radius: 100px;
   box-shadow:
@@ -737,7 +732,7 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
-/* ── Sliding pill (same spring as navbar) ─────────────────── */
+/* â”€â”€ Sliding pill (same spring as navbar) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .db-tabs__pill {
   position: absolute;
   top: 6px;
@@ -788,7 +783,7 @@
   pointer-events: none;
 }
 
-/* ── Tab buttons ─────────────────────────────────────────── */
+/* â”€â”€ Tab buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .db-tab {
   position: relative;
   z-index: 1;
@@ -865,7 +860,7 @@
   color: #e2e8f0;
 }
 
-/* ── Card filter animation — managed entirely via inline JS styles ──
+/* â”€â”€ Card filter animation â€” managed entirely via inline JS styles â”€â”€
    JS sets opacity/transform/display directly on each card during
    tab filter. CSS transition here handles hover only. */
 .db-grid .portfolio-card {
@@ -873,7 +868,7 @@
     box-shadow   0.4s ease,
     border-color 0.3s ease;
 }
-/* .tab-hidden class is no longer used — JS uses display:none */
+/* .tab-hidden class is no longer used â€” JS uses display:none */
 
 
 .db-grid {
@@ -1050,7 +1045,7 @@
   font-size: 14px;
 }
 
-/* ── FOOTER ───────────────────────────────────────────────────── */
+/* â”€â”€ FOOTER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .db-footer {
   padding: 0 0 60px;
 }
@@ -1116,7 +1111,7 @@
 }
 .db-footer__admin-link:hover { color: #c4b5fd; }
 
-/* ── SCROLL REVEAL ────────────────────────────────────────────── */
+/* â”€â”€ SCROLL REVEAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .reveal {
   opacity: 0;
   transform: translateY(40px);
@@ -1124,7 +1119,7 @@
 }
 .reveal.visible { opacity: 1; transform: translateY(0); }
 
-/* ── RESPONSIVE ───────────────────────────────────────────────── */
+/* â”€â”€ RESPONSIVE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 960px) {
   .db-hero__layout {
     grid-template-columns: 1fr;
@@ -1167,7 +1162,7 @@
   .db-links .db-link[data-section="kontak"] { display: none; }
 }
 
-/* ══ GOOGLE DRIVE PHOTO ALBUM CARD & GLASS MODAL ═══════════════ */
+/* â•â• GOOGLE DRIVE PHOTO ALBUM CARD & GLASS MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 body.modal-open {
   overflow: hidden !important;
 }
@@ -1258,7 +1253,7 @@ body.modal-open {
   transform: translateY(0);
 }
 
-/* ── MODAL FULLSCREEN GLASSMORPHISM ───────────────────────────── */
+/* â”€â”€ MODAL FULLSCREEN GLASSMORPHISM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .db-modal {
   position: fixed !important;
   top: 0 !important;
@@ -1291,8 +1286,8 @@ body.modal-open {
   width: 100%;
   height: 100%;
   background: rgba(4, 6, 15, 0.86);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   z-index: 1;
 }
 
@@ -1335,8 +1330,8 @@ body.modal-open {
   display: flex;
   flex-direction: column;
   background: rgba(16, 18, 34, 0.92);
-  backdrop-filter: blur(35px);
-  -webkit-backdrop-filter: blur(35px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 24px;
   overflow: hidden;
@@ -1517,9 +1512,9 @@ body.modal-open {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   FEATURED SECTION — Zigzag editorial layout
-   ═══════════════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   FEATURED SECTION â€” Zigzag editorial layout
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .featured-section {
   padding: 100px 0 80px;
   position: relative;
@@ -1603,7 +1598,7 @@ body.modal-open {
   margin-top: 56px;
 }
 
-/* ── Featured List (Zigzag) ─────────────────────────────────── */
+/* â”€â”€ Featured List (Zigzag) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .featured-list {
   display: flex;
   flex-direction: column;
@@ -1936,9 +1931,9 @@ body.modal-open {
 .featured-empty__card p { font-size: 15px; color: var(--text-muted); line-height: 1.7; margin: 0; }
 .featured-empty__card small { font-size: 13px; opacity: 0.7; }
 
-/* ═══════════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    VIDEO POPUP MODAL
-   ═══════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .video-modal .db-modal__backdrop { background: rgba(0,0,0,0.88); backdrop-filter: blur(20px); }
 
 .video-modal__dialog {
@@ -1966,9 +1961,9 @@ body.modal-open {
   display: block; outline: none;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   RESPONSIVE — Featured Sections
-   ═══════════════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   RESPONSIVE â€” Featured Sections
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @media (max-width: 900px) {
   .feat-item {
     grid-template-columns: 1fr;
@@ -1990,4 +1985,58 @@ body.modal-open {
 @media (max-width: 600px) {
   .feat-caption__cta { width: 100%; justify-content: center; }
   .featured-section__title { font-size: 1.8rem; }
+}
+
+
+/* ============================================================
+   MOBILE PERFORMANCE OVERRIDES
+   Target: Android Chrome (pointer: coarse = layar sentuh)
+   Tujuan: Pertahankan semua animasi tapi kurangi beban GPU.
+   iPhone Safari TIDAK terpengaruh (Safari handle blur lebih baik).
+   ============================================================ */
+@media (pointer: coarse) {
+  /* Matikan backdrop-filter di semua glass element di mobile.
+     Android Chrome sangat lambat render backdrop-filter di atas canvas.
+     Kompensasi: naikkan opacity background agar tetap terlihat bagus. */
+  .glass-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(18, 16, 38, 0.88);
+  }
+  .glass-chip {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255,255,255,0.12);
+  }
+  .db-nav__inner {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(8, 8, 22, 0.95);
+  }
+  .db-modal__backdrop {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .db-modal__dialog {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(12, 14, 30, 0.98);
+  }
+
+  /* Orb lebih kecil & blur lebih ringan di mobile */
+  .orb { filter: blur(40px); }
+  .orb-1 { width: 360px; height: 360px; }
+  .orb-2 { width: 280px; height: 280px; }
+  .orb-3 { width: 240px; height: 240px; }
+  .orb-4 { display: none; } /* 2 orb terakhir dihapus di mobile */
+  .orb-5 { display: none; }
+
+  /* Grain overlay dimatikan di mobile */
+  .grain-overlay { display: none; }
+
+  /* Card tilt effect dimatikan di mobile (tidak ada mouse) */
+  .portfolio-card { transform: none !important; }
+
+  /* Kurangi animasi canvas opacity agar blend lebih cepat */
+  #mesh-canvas { opacity: 0.45; }
 }
