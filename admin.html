@@ -37,6 +37,7 @@
             <label>Upload video ke Cloudflare R2
               <input type="file" id="work-file" accept="video/mp4,video/webm,video/quicktime,video/*,image/*">
             </label>
+            <div id="work-file-info" class="file-size-hint" hidden></div>
             <label>Atau URL publik Cloudflare R2
               <input type="url" id="work-r2-url" placeholder="https://pub-xxx.r2.dev/works/...">
             </label>
@@ -57,6 +58,7 @@
             <label>Upload Foto Sampul / Cover Album
               <input type="file" id="work-album-cover-file" accept="image/*">
             </label>
+            <div id="work-album-cover-info" class="file-size-hint" hidden></div>
             <label>Atau URL Foto Sampul (Link Foto Drive / Gambar Web)
               <input type="url" id="work-album-cover-url" placeholder="https://... atau link file share Drive">
             </label>
@@ -98,9 +100,9 @@
     </div>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js"></script>
+  <script src="supabase-config.js?v=20260924_2"></script>
   <script src="admin-config.js"></script>
-  <script src="script.js"></script>
-  <script src="animations.js"></script>
+  <script src="script.js?v=20260924_2"></script>
+  <script src="animations.js?v=20260924_2"></script>
 </body>
 </html>

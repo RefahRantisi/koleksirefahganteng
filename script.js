@@ -652,6 +652,10 @@ function cancelEditWork() {
   // Clear progress container if any
   const progressContainer = document.getElementById('upload-progress-container');
   if (progressContainer) progressContainer.hidden = true;
+  const fileInfo = document.getElementById('work-file-info');
+  if (fileInfo) fileInfo.hidden = true;
+  const coverFileInfo = document.getElementById('work-album-cover-info');
+  if (coverFileInfo) coverFileInfo.hidden = true;
 }
 
 function renderSocialMedia() {
@@ -758,19 +762,36 @@ async function uploadToR2Worker(file, onProgress) {
     throw new Error('Token upload tidak diterima dari server.');
   }
 
-  const formData = new FormData();
-  formData.append('file', file);
+  // Deteksi MIME type yang tepat agar tidak ditolak worker
+  let mimeType = file.type;
+  if (!mimeType || mimeType === 'application/octet-stream') {
+    const ext = (file.name || '').split('.').pop().toLowerCase();
+    const mimeMap = {
+      mp4: 'video/mp4', webm: 'video/webm', mov: 'video/quicktime', mkv: 'video/mp4',
+      jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif'
+    };
+    mimeType = mimeMap[ext] || 'video/mp4';
+  }
+
+  // Gunakan streaming binary langsung (RAW STREAM)
+  // JANGAN gunakan FormData (multipart/form-data) karena request.formData() di Cloudflare Worker
+  // mem-parsing dan menampung file di RAM Worker (128 MB), menyebabkan Worker crash/koneksi putus di file besar.
+  const targetUrl = workerUrl + (workerUrl.includes('?') ? '&' : '?') + 'filename=' + encodeURIComponent(file.name || 'upload.mp4');
 
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
-    request.open('POST', workerUrl);
+    request.open('POST', targetUrl);
 
-    // Kirim HMAC token via Authorization header
+    // Kirim token otorisasi dan Content-Type media langsung
     request.setRequestHeader('Authorization', `Bearer ${uploadToken}`);
+    request.setRequestHeader('Content-Type', mimeType);
 
     request.upload.addEventListener('progress', event => {
       if (!event.lengthComputable) return;
-      onProgress?.(Math.round((event.loaded / event.total) * 100));
+      const percent = Math.round((event.loaded / event.total) * 100);
+      const loadedMb = (event.loaded / (1024 * 1024)).toFixed(1);
+      const totalMb = (event.total / (1024 * 1024)).toFixed(1);
+      onProgress?.(percent, loadedMb, totalMb);
     });
 
     request.addEventListener('load', () => {
@@ -799,7 +820,7 @@ async function uploadToR2Worker(file, onProgress) {
       ));
     });
     request.addEventListener('abort', () => reject(new Error('Upload dibatalkan.')));
-    request.send(formData);
+    request.send(file);
   });
 }
 
@@ -927,6 +948,49 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (mediaDriveContainer) mediaDriveContainer.hidden = !isDrive;
   });
 
+  // Tampilkan info ukuran file secara instan saat user memilih file
+  const fileInputEl = document.getElementById('work-file');
+  const fileInfoEl = document.getElementById('work-file-info');
+  fileInputEl?.addEventListener('change', () => {
+    const file = fileInputEl.files?.[0];
+    if (!file) {
+      if (fileInfoEl) fileInfoEl.hidden = true;
+      return;
+    }
+    const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+    if (fileInfoEl) {
+      fileInfoEl.hidden = false;
+      if (file.size > 95 * 1024 * 1024) {
+        fileInfoEl.className = 'file-size-hint file-size-hint--warn';
+        fileInfoEl.innerHTML = `⚠️ <strong>${escapeHtml(file.name)} (${sizeMb} MB)</strong>: Melebihi batas 95 MB. Silakan kompres video terlebih dahulu, atau unggah langsung ke dashboard Cloudflare R2 lalu masukkan URL publiknya di bawah.`;
+      } else {
+        fileInfoEl.className = 'file-size-hint file-size-hint--ok';
+        fileInfoEl.innerHTML = `✓ <strong>${escapeHtml(file.name)} (${sizeMb} MB)</strong>: Ukuran aman dan siap diunggah ke Cloudflare R2.`;
+      }
+    }
+  });
+
+  const coverFileInputEl = document.getElementById('work-album-cover-file');
+  const coverFileInfoEl = document.getElementById('work-album-cover-info');
+  coverFileInputEl?.addEventListener('change', () => {
+    const file = coverFileInputEl.files?.[0];
+    if (!file) {
+      if (coverFileInfoEl) coverFileInfoEl.hidden = true;
+      return;
+    }
+    const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+    if (coverFileInfoEl) {
+      coverFileInfoEl.hidden = false;
+      if (file.size > 20 * 1024 * 1024) {
+        coverFileInfoEl.className = 'file-size-hint file-size-hint--warn';
+        coverFileInfoEl.innerHTML = `⚠️ <strong>${escapeHtml(file.name)} (${sizeMb} MB)</strong>: Foto cover terlalu besar. Disarankan di bawah 10 MB.`;
+      } else {
+        coverFileInfoEl.className = 'file-size-hint file-size-hint--ok';
+        coverFileInfoEl.innerHTML = `✓ <strong>${escapeHtml(file.name)} (${sizeMb} MB)</strong>: Siap diunggah sebagai foto cover album.`;
+      }
+    }
+  });
+
   const portfolioForm = document.getElementById('portfolio-form');
   portfolioForm?.addEventListener('submit', async event => {
     event.preventDefault();
@@ -974,9 +1038,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             progressFill.style.width = '0%';
             progressText.textContent = 'Mengunggah foto cover ke R2: 0%';
           }
-          coverUrl = await uploadToR2Worker(coverFile, percent => {
+          coverUrl = await uploadToR2Worker(coverFile, (percent, loadedMb, totalMb) => {
             if (progressFill) progressFill.style.width = `${percent}%`;
-            if (progressText) progressText.textContent = `Mengunggah foto cover ke R2: ${percent}%`;
+            if (progressText) {
+              progressText.textContent = totalMb 
+                ? `Mengunggah foto cover: ${percent}% (${loadedMb} MB / ${totalMb} MB)`
+                : `Mengunggah foto cover: ${percent}%`;
+            }
           });
         }
 
@@ -1031,9 +1099,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             progressFill.style.width = '0%';
             progressText.textContent = 'Mengunggah ke Cloudflare R2: 0%';
           }
-          finalMediaUrl = await uploadToR2Worker(file, percent => {
+          finalMediaUrl = await uploadToR2Worker(file, (percent, loadedMb, totalMb) => {
             if (progressFill) progressFill.style.width = `${percent}%`;
-            if (progressText) progressText.textContent = `Mengunggah ke Cloudflare R2: ${percent}%`;
+            if (progressText) {
+              progressText.textContent = totalMb 
+                ? `Mengunggah ke Cloudflare R2: ${percent}% (${loadedMb} MB / ${totalMb} MB)`
+                : `Mengunggah ke Cloudflare R2: ${percent}%`;
+            }
           });
         }
 
