@@ -773,9 +773,42 @@ async function uploadToR2Worker(file, onProgress) {
     mimeType = mimeMap[ext] || 'video/mp4';
   }
 
-  // Gunakan streaming binary langsung (RAW STREAM)
-  // JANGAN gunakan FormData (multipart/form-data) karena request.formData() di Cloudflare Worker
-  // mem-parsing dan menampung file di RAM Worker (128 MB), menyebabkan Worker crash/koneksi putus di file besar.
+  // 1. TAHAP PRE-BUFFER (Paling penting untuk Google Drive di Android):
+  // Saat user memilih file dari Google Drive di HP Android, file tersebut belum ada di memori internal.
+  // Membaca file ke memori terlebih dahulu memastikan seluruh byte sudah terunduh sempurna ke HP
+  // SEBELUM koneksi ke Cloudflare Worker dibuka, sehingga koneksi upload tidak akan stall / timeout!
+  let readyBlob = file;
+  try {
+    const totalBytes = file.size || 0;
+    const totalMb = (totalBytes / (1024 * 1024)).toFixed(1);
+    onProgress?.(0, '0.0', totalMb, 'Menyiapkan file dari perangkat / Google Drive...');
+
+    if (file.stream) {
+      const reader = file.stream().getReader();
+      const chunks = [];
+      let loaded = 0;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        loaded += value.length;
+        if (totalBytes > 0) {
+          const pct = Math.round((loaded / totalBytes) * 100);
+          const loadedMb = (loaded / (1024 * 1024)).toFixed(1);
+          onProgress?.(pct, loadedMb, totalMb, `Mengambil file dari Google Drive: ${pct}% (${loadedMb} MB / ${totalMb} MB)`);
+        }
+      }
+      readyBlob = new Blob(chunks, { type: mimeType });
+    } else {
+      const buffer = await file.arrayBuffer();
+      readyBlob = new Blob([buffer], { type: mimeType });
+    }
+  } catch (bufferErr) {
+    console.warn('Pre-buffering file gagal, beralih ke streaming langsung:', bufferErr);
+    readyBlob = file;
+  }
+
+  // 2. TAHAP UPLOAD KE CLOUDFLARE R2 (Menggunakan binary stream dari memori)
   const targetUrl = workerUrl + (workerUrl.includes('?') ? '&' : '?') + 'filename=' + encodeURIComponent(file.name || 'upload.mp4');
 
   return new Promise((resolve, reject) => {
@@ -791,7 +824,7 @@ async function uploadToR2Worker(file, onProgress) {
       const percent = Math.round((event.loaded / event.total) * 100);
       const loadedMb = (event.loaded / (1024 * 1024)).toFixed(1);
       const totalMb = (event.total / (1024 * 1024)).toFixed(1);
-      onProgress?.(percent, loadedMb, totalMb);
+      onProgress?.(percent, loadedMb, totalMb, `Mengunggah ke Cloudflare R2: ${percent}% (${loadedMb} MB / ${totalMb} MB)`);
     });
 
     request.addEventListener('load', () => {
@@ -820,7 +853,7 @@ async function uploadToR2Worker(file, onProgress) {
       ));
     });
     request.addEventListener('abort', () => reject(new Error('Upload dibatalkan.')));
-    request.send(file);
+    request.send(readyBlob);
   });
 }
 
@@ -1038,12 +1071,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             progressFill.style.width = '0%';
             progressText.textContent = 'Mengunggah foto cover ke R2: 0%';
           }
-          coverUrl = await uploadToR2Worker(coverFile, (percent, loadedMb, totalMb) => {
+          coverUrl = await uploadToR2Worker(coverFile, (percent, loadedMb, totalMb, customText) => {
             if (progressFill) progressFill.style.width = `${percent}%`;
             if (progressText) {
-              progressText.textContent = totalMb 
+              progressText.textContent = customText || (totalMb 
                 ? `Mengunggah foto cover: ${percent}% (${loadedMb} MB / ${totalMb} MB)`
-                : `Mengunggah foto cover: ${percent}%`;
+                : `Mengunggah foto cover: ${percent}%`);
             }
           });
         }
@@ -1099,12 +1132,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             progressFill.style.width = '0%';
             progressText.textContent = 'Mengunggah ke Cloudflare R2: 0%';
           }
-          finalMediaUrl = await uploadToR2Worker(file, (percent, loadedMb, totalMb) => {
+          finalMediaUrl = await uploadToR2Worker(file, (percent, loadedMb, totalMb, customText) => {
             if (progressFill) progressFill.style.width = `${percent}%`;
             if (progressText) {
-              progressText.textContent = totalMb 
+              progressText.textContent = customText || (totalMb 
                 ? `Mengunggah ke Cloudflare R2: ${percent}% (${loadedMb} MB / ${totalMb} MB)`
-                : `Mengunggah ke Cloudflare R2: ${percent}%`;
+                : `Mengunggah ke Cloudflare R2: ${percent}%`);
             }
           });
         }
