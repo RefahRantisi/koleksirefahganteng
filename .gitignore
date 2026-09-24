@@ -1,0 +1,14 @@
+# Database schema (arsip lokal)
+supabase-schema.sql
+
+# Cloudflare worker backend (dideploy ke Cloudflare Dashboard/CLI)
+cloudflare-worker/
+
+# OS & Environment
+.DS_Store
+Thumbs.db
+*.log
+
+# Local environment variables (JANGAN commit ke git)
+.env.local
+.env

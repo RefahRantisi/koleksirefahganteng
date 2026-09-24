@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | PDD Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="admin-page">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="cursor-glow" id="cursor-glow"></div>
+  <header class="site-header"><a class="brand" href="index.html"><span class="brand-mark">P</span><span>PDD <em>Studio</em></span></a><nav class="main-nav"><a href="index.html">Lihat website <span>↗</span></a><button id="admin-logout-btn" class="logout-link" type="button">Keluar</button></nav></header>
+  <main class="admin-layout page-shell" id="admin-content" hidden>
+    <div class="admin-intro"><p class="eyebrow"><span></span> Workspace admin</p><h1>Kelola <i>portofolio.</i></h1><p>Tambahkan karya baru agar langsung tampil di dashboard publik.</p></div>
+    <div class="admin-grid">
+      <section class="form-panel"><div class="panel-title"><h2>Data owner</h2><span>01</span></div><form id="profile-form"><label>Nama owner<input type="text" id="owner-name" required></label><label>Tanggal lahir<input type="date" id="birth-date"></label><label>Foto profile<input type="file" id="profile-photo" accept="image/*"></label><label>Tentang owner<textarea id="owner-about-input" rows="4" required></textarea></label><button class="primary-button full-button" type="submit">Simpan profil <span>→</span></button></form></section>
+      <section class="form-panel" id="work-form-panel">
+        <div class="panel-title"><h2 id="work-form-heading">Tambah karya</h2><span id="work-form-step">02</span></div>
+        <form id="portfolio-form">
+          <input type="hidden" id="edit-work-id" value="">
+          <label>Tipe Media / Format
+            <select id="work-media-type">
+              <option value="video">Video (Cloudflare R2)</option>
+              <option value="drive_album">Album Foto (Google Drive Folder)</option>
+            </select>
+          </label>
+          <label>Judul karya / album
+            <input type="text" id="work-title" placeholder="Contoh: Dokumentasi Festival Seni" required>
+          </label>
+
+          <!-- Input Khusus Video R2 -->
+          <div id="media-r2-container">
+            <label>Upload video ke Cloudflare R2
+              <input type="file" id="work-file" accept="video/mp4,video/webm,video/quicktime,video/*,image/*">
+            </label>
+            <label>Atau URL publik Cloudflare R2
+              <input type="url" id="work-r2-url" placeholder="https://pub-xxx.r2.dev/works/...">
+            </label>
+            <div class="upload-progress-container" id="upload-progress-container" hidden>
+              <div class="progress-bar"><div class="progress-fill" id="upload-progress-fill"></div></div>
+              <span class="progress-text" id="upload-progress-text">Mengunggah: 0%</span>
+            </div>
+            <p class="form-hint">Unggah video (MP4/WebM) langsung, atau masukkan URL publik R2.</p>
+          </div>
+
+          <!-- Input Khusus Album Google Drive (Ratusan Foto) -->
+          <div id="media-drive-container" hidden>
+            <label>Link Folder Google Drive (Berisi Ratusan Foto)
+              <input type="url" id="work-drive-folder-url" placeholder="https://drive.google.com/drive/folders/1ABCxxxxxxxxxx">
+            </label>
+            <p class="form-hint">💡 Pastikan pengaturan sharing di Google Drive: <strong>"Siapa saja yang memiliki link" ➔ "Pelihat"</strong>.</p>
+            
+            <label>Upload Foto Sampul / Cover Album
+              <input type="file" id="work-album-cover-file" accept="image/*">
+            </label>
+            <label>Atau URL Foto Sampul (Link Foto Drive / Gambar Web)
+              <input type="url" id="work-album-cover-url" placeholder="https://... atau link file share Drive">
+            </label>
+            <p class="form-hint">Foto sampul akan tampil sebagai thumbnail utama album di dashboard portofolio.</p>
+          </div>
+
+          <label>Tanggal karya
+            <input type="date" id="work-date" required>
+          </label>
+
+          <label>Deskripsi / Cerita Singkat Karya
+            <textarea id="work-description" rows="3" placeholder="Ceritakan sedikit tentang proses, konsep, atau momen di balik karya ini..."></textarea>
+          </label>
+          <p class="form-hint">Deskripsi akan tampil di samping karya pada halaman beranda (jika karya dipilih sebagai pilihan beranda).</p>
+
+          <label>Tool yang digunakan <em>(pilih satu atau lebih)</em></label>
+          <div id="tool-checkbox-group" class="tool-checkbox-group"></div>
+
+          <div class="featured-toggle-wrap">
+            <label class="featured-toggle-label">
+              <input type="checkbox" id="work-is-featured" class="featured-checkbox">
+              <span class="featured-toggle-text">
+                <span class="featured-star">⭐</span>
+                <span>
+                  <strong>Tampilkan sebagai Karya Pilihan di Beranda</strong>
+                  <em>Maksimal 3 karya per kategori (Video & Foto)</em>
+                </span>
+              </span>
+            </label>
+          </div>
+
+          <button class="primary-button full-button" id="work-submit" type="submit">Simpan karya <span>→</span></button>
+          <button class="cancel-edit-btn" id="cancel-edit-btn" type="button" hidden>✕ Batal Edit</button>
+        </form>
+      </section>
+      <section class="form-panel"><div class="panel-title"><h2>Tambah tool</h2><span>03</span></div><form id="tool-form"><label>Nama tool<input type="text" id="tool-name" placeholder="Contoh: Figma" required></label><button class="primary-button full-button" type="submit">Tambah tool <span>→</span></button></form><div id="tool-list" class="tool-list"></div></section>
+      <section class="form-panel"><div class="panel-title"><h2>Sosial media</h2><span>04</span></div><form id="social-form"><label>Platform<select id="social-platform" required><option value="Instagram" data-icon="instagram">Instagram</option><option value="Facebook" data-icon="facebook">Facebook</option><option value="YouTube" data-icon="youtube">YouTube</option><option value="TikTok" data-icon="tiktok">TikTok</option><option value="LinkedIn" data-icon="linkedin">LinkedIn</option><option value="X" data-icon="x">X</option></select></label><label>Username<input type="text" id="social-username" placeholder="@username" required></label><label>Link profile<input type="url" id="social-url" placeholder="https://instagram.com/username" required></label><button class="primary-button full-button" type="submit">Tambah sosial media <span>→</span></button></form><div id="social-list" class="tool-list"></div></section>
+      <section class="list-panel"><div class="panel-title"><h2>Daftar karya</h2><span id="admin-count">0 karya</span></div><div id="featured-warning-banner" class="featured-warning-banner" hidden></div><div id="admin-list" class="admin-list"></div></section>
+    </div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="admin-config.js"></script>
+  <script src="script.js"></script>
+  <script src="animations.js"></script>
+</body>
+</html>

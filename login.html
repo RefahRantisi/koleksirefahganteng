@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Admin | PDD Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="admin-page">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="cursor-glow" id="cursor-glow"></div>
+
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">P</span>
+      <span>PDD <em>Studio</em></span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">Kembali ke website <span>↗</span></a>
+    </nav>
+  </header>
+
+  <main class="login-layout page-shell">
+    <section class="login-panel">
+      <p class="eyebrow"><span></span> Private workspace</p>
+      <h1>Masuk ke <i>admin.</i></h1>
+      <p>Gunakan nomor telepon dan PIN angka untuk masuk.</p>
+      <form id="login-form">
+        <label>Nomor Telepon
+          <input type="tel" id="login-name" inputmode="numeric" pattern="[0-9]*" placeholder="08xxxxxxxxxx" autocomplete="tel" required>
+        </label>
+        <label>PIN / Password Angka
+          <input type="password" id="login-password" inputmode="numeric" pattern="[0-9]*" placeholder="Masukkan PIN angka" autocomplete="current-password" required>
+        </label>
+        <button class="primary-button full-button" type="submit">Masuk <span>→</span></button>
+        <p class="login-error" id="login-error" hidden></p>
+      </form>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="script.js"></script>
+  <script src="animations.js"></script>
+</body>
+</html>

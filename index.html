@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDD Studio | Portfolio</title>
+  <meta name="description" content="Portfolio kreatif PDD Studio — karya visual, dokumentasi, dan arsip personal.">
+  <meta name="referrer" content="no-referrer">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body class="db-page">
+
+  <!-- ══ ANIMATED MESH BACKGROUND ══════════════════════════════ -->
+  <div class="mesh-bg" aria-hidden="true">
+    <canvas id="mesh-canvas"></canvas>
+    <!-- Static colour orbs underneath mesh -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+    <div class="orb orb-5"></div>
+    <!-- Grid texture overlay -->
+    <div class="grid-overlay"></div>
+    <!-- Noise grain overlay -->
+    <div class="grain-overlay"></div>
+  </div>
+
+  <!-- ══ FLOATING NAV PILL ══════════════════════════════════════ -->
+  <header class="db-nav" id="db-nav">
+    <div class="db-nav__inner">
+      <a class="db-brand" href="#hero">
+        <span class="db-brand__mark" id="owner-avatar">P</span>
+        <span class="db-brand__name"><em id="owner-brand-name">Portfolio</em></span>
+      </a>
+      <nav class="db-links" aria-label="Navigasi utama">
+        <a href="#hero" class="db-link active" data-section="hero">Beranda</a>
+        <a href="#tentang" class="db-link" data-section="tentang">Tentang</a>
+        <a href="#portfolio" class="db-link" data-section="portfolio">Video</a>
+        <a href="#foto" class="db-link" data-section="foto">Foto</a>
+        <a href="#kontak" class="db-link" data-section="kontak">Kontak</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ══ HERO ══════════════════════════════════════════════════ -->
+    <section class="db-hero" id="hero">
+      <div class="db-hero__layout">
+
+        <!-- Left: Profile photo in glass frame -->
+        <div class="db-hero__photo-wrap" id="hero-photo-wrap">
+          <div class="db-hero__photo-card glass-card">
+            <div class="db-hero__photo visual-main" id="hero-photo-bg">
+              <!-- Photo loaded via JS: style.backgroundImage -->
+              <div class="db-hero__photo-placeholder">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+            </div>
+            <!-- Floating badge on photo -->
+            <div class="db-hero__photo-badge glass-chip">
+              <span class="dot-pulse"></span>
+              <span>Tersedia untuk kolaborasi</span>
+            </div>
+          </div>
+          <!-- Decorative ring around photo -->
+          <div class="db-hero__photo-ring" aria-hidden="true"></div>
+        </div>
+
+        <!-- Right: Info -->
+        <div class="db-hero__info">
+          <div class="db-hero__eyebrow glass-chip">
+            <span class="eyebrow-dot"></span>
+            <span>Portfolio personal</span>
+          </div>
+
+          <h1 class="db-hero__title">
+            Halo, saya<br>
+            <span class="gradient-text" id="owner-name-hero">Owner PDD.</span>
+          </h1>
+
+          <!-- Stats row -->
+          <div class="db-stats">
+            <div class="db-stat glass-card">
+              <span class="db-stat__value gradient-text" id="owner-birth">—</span>
+              <span class="db-stat__label">Tanggal lahir</span>
+            </div>
+            <div class="db-stat glass-card">
+              <span class="db-stat__value gradient-text" id="project-count">00</span>
+              <span class="db-stat__label">Karya</span>
+            </div>
+            <div class="db-stat glass-card">
+              <span class="db-stat__value gradient-text">✦</span>
+              <span class="db-stat__label">PDD Studio</span>
+            </div>
+          </div>
+
+          <!-- CTA -->
+          <div class="db-hero__cta">
+            <a class="btn-primary" href="#portfolio">
+              <span>Lihat karya</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <a class="btn-ghost" href="#kontak">
+              <span>Kontak</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Scroll hint -->
+      <div class="db-scroll-hint" aria-hidden="true">
+        <div class="db-scroll-hint__line"></div>
+        <span>Scroll</span>
+      </div>
+    </section>
+
+    <!-- ══ TENTANG ════════════════════════════════════════════════ -->
+    <section class="db-about" id="tentang">
+      <div class="db-container">
+        <div class="db-about__card glass-card reveal">
+          <div class="db-about__badge glass-chip"><span>✦</span> Tentang saya</div>
+          <h2 class="db-about__title">Ruang kecil untuk<br><span class="gradient-text">karya yang berarti.</span></h2>
+          <p class="db-about__text" id="owner-about">Cerita tentang owner akan tampil di sini setelah profil diisi melalui halaman admin.</p>
+
+          <!-- Social links inside about card -->
+          <div class="db-about__social" id="social-links"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ KARYA VIDEO PILIHAN ════════════════════════════════ -->
+    <section class="featured-section" id="portfolio" aria-label="Karya Video Pilihan">
+      <div class="db-container">
+        <div class="featured-section__head reveal">
+          <div class="featured-section__title-group">
+            <div class="glass-chip"><span>🎬</span> Video Cinematography</div>
+            <h2 class="featured-section__title">Karya video<br><span class="gradient-text">terbaik.</span></h2>
+            <p class="featured-section__sub">Setiap frame adalah kisah — diabadikan dengan penuh niat dan teknik.</p>
+          </div>
+          <a class="btn-view-all" href="gallery.html?type=video" id="view-all-videos">
+            <span>Lihat Semua Video</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+
+        <!-- Featured video list (zigzag) — rendered by script.js -->
+        <div class="featured-list" id="video-featured-list"></div>
+
+        <!-- Empty state: no featured videos -->
+        <div class="featured-empty" id="video-empty-state" hidden>
+          <div class="glass-card featured-empty__card">
+            <span>🎬</span>
+            <p>Belum ada video pilihan yang ditampilkan.<br><small>Pilih karya video di halaman admin untuk menampilkannya di sini.</small></p>
+          </div>
+        </div>
+
+        <!-- View All button (bottom, mobile friendly) -->
+        <div class="featured-section__footer reveal">
+          <a class="btn-view-all btn-view-all--ghost" href="gallery.html?type=video">
+            <span>Lihat Semua Video Karya</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ KARYA FOTO PILIHAN ══════════════════════════════════ -->
+    <section class="featured-section featured-section--alt" id="foto" aria-label="Karya Foto Pilihan">
+      <div class="db-container">
+        <div class="featured-section__head reveal">
+          <div class="featured-section__title-group">
+            <div class="glass-chip"><span>📷</span> Photography &amp; Album</div>
+            <h2 class="featured-section__title">Karya foto<br><span class="gradient-text">pilihan.</span></h2>
+            <p class="featured-section__sub">Ratusan momen diabadikan — setiap album adalah cerita yang utuh.</p>
+          </div>
+          <a class="btn-view-all" href="gallery.html?type=drive_album" id="view-all-photos">
+            <span>Lihat Semua Foto</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+
+        <!-- Featured photo list (zigzag) — rendered by script.js -->
+        <div class="featured-list" id="photo-featured-list"></div>
+
+        <!-- Empty state: no featured photos -->
+        <div class="featured-empty" id="photo-empty-state" hidden>
+          <div class="glass-card featured-empty__card">
+            <span>📷</span>
+            <p>Belum ada foto pilihan yang ditampilkan.<br><small>Pilih karya album foto di halaman admin untuk menampilkannya di sini.</small></p>
+          </div>
+        </div>
+
+        <!-- View All button (bottom) -->
+        <div class="featured-section__footer reveal">
+          <a class="btn-view-all btn-view-all--ghost" href="gallery.html?type=drive_album">
+            <span>Lihat Semua Album Foto</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ══ FOOTER / KONTAK ════════════════════════════════════════ -->
+  <footer class="db-footer" id="kontak">
+    <div class="db-container">
+      <div class="db-footer__card glass-card reveal">
+        <div class="db-footer__top">
+          <div class="db-footer__identity">
+            <div class="db-brand">
+              <span class="db-brand__mark" id="footer-owner-avatar">P</span>
+              <span class="db-brand__name"><em id="footer-owner-name">Portfolio</em></span>
+            </div>
+            <p class="db-footer__tagline">Selected works &amp; personal archive.</p>
+          </div>
+          <nav class="db-footer__nav">
+            <a href="#hero">Beranda</a>
+            <a href="#tentang">Tentang</a>
+            <a href="#portfolio">Video</a>
+            <a href="#foto">Foto</a>
+            <a href="gallery.html">Semua Karya</a>
+          </nav>
+          <div class="db-footer__social">
+            <span class="db-footer__social-label">Temukan saya</span>
+            <div class="social-links" id="footer-social-links"></div>
+          </div>
+        </div>
+        <div class="db-footer__bottom">
+          <span>© 2026 <span id="footer-copyright-name">Portfolio</span></span>
+          <a href="login.html" class="db-footer__admin-link">Admin ↗</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ══ DRIVE ALBUM FULLSCREEN MODAL (GLASSMORPHISM) ════════════ -->
+  <div class="db-modal" id="drive-album-modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="db-modal__backdrop" id="drive-modal-backdrop"></div>
+    
+    <!-- Tombol Tutup Mengambang di Pojok Layar (Selalu Terlihat & Tidak Bisa Terpotong) -->
+    <button class="db-modal__screen-close" id="drive-modal-screen-close" type="button" aria-label="Tutup Galeri">
+      ✕ Tutup
+    </button>
+
+    <div class="db-modal__dialog glass-card">
+      <header class="db-modal__header">
+        <div class="db-modal__info">
+          <span class="db-modal__tag">📁 Album Foto Google Drive</span>
+          <h2 class="db-modal__heading" id="drive-modal-title">Galeri Foto</h2>
+        </div>
+        <div class="db-modal__ctrls">
+          <a href="#" target="_blank" rel="noopener noreferrer" class="db-modal__ext-btn" id="drive-modal-ext-link">
+            Buka di Drive ↗
+          </a>
+          <button class="db-modal__close" id="drive-modal-close" type="button" aria-label="Tutup Galeri">✕</button>
+        </div>
+      </header>
+      <div class="db-modal__frame-wrap">
+        <div class="db-modal__loading" id="drive-modal-loading">
+          <div class="db-modal__spinner"></div>
+          <span>Menghubungkan ke folder Google Drive...</span>
+        </div>
+        <iframe class="db-modal__frame" id="drive-modal-iframe" allow="autoplay; fullscreen" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ VIDEO POPUP MODAL ════════════════════════════════════════ -->
+  <div class="db-modal video-modal" id="video-modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="db-modal__backdrop" id="video-modal-backdrop"></div>
+    <button class="db-modal__screen-close" id="video-modal-screen-close" type="button" aria-label="Tutup Video">
+      ✕ Tutup
+    </button>
+    <div class="video-modal__dialog glass-card">
+      <header class="db-modal__header">
+        <div class="db-modal__info">
+          <span class="db-modal__tag">🎬 Video Karya</span>
+          <h2 class="db-modal__heading" id="video-modal-title">Video</h2>
+        </div>
+        <div class="db-modal__ctrls">
+          <button class="db-modal__close" id="video-modal-close" type="button" aria-label="Tutup Video">✕</button>
+        </div>
+      </header>
+      <div class="video-modal__frame-wrap">
+        <video class="video-modal__player" id="video-modal-player" controls playsinline preload="metadata"></video>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="script.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
