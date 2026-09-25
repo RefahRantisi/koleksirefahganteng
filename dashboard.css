@@ -2042,70 +2042,35 @@ body.modal-open {
   #mesh-canvas { opacity: 0.45; }
 }
 
-/* ══ VIDEO MODAL STREAMING, LOADING & ERROR STATES ══════════════ */
-.video-modal__loading {
-  position: absolute;
-  inset: 0;
-  display: none;
-  flex-direction: column;
+/* ══ VIDEO MODAL RESPONSIVE FIT (Portrait Reels & Landscape) ════ */
+.video-modal__dialog {
+  max-height: 92vh;
+}
+.video-modal__frame-wrap {
+  aspect-ratio: auto;
+  min-height: 240px;
+  max-height: calc(88vh - 65px);
+  background: #000;
+  position: relative;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  background: rgba(10, 8, 24, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  z-index: 5;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 500;
-  pointer-events: none;
+}
+.video-modal__player {
+  width: 100%;
+  max-height: calc(88vh - 65px);
+  display: block;
+  outline: none;
+  background: #000;
+  object-fit: contain;
+}
+.video-modal__iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 360px;
+  display: block;
+  outline: none;
+  border: none;
 }
 
-.video-modal__error {
-  position: absolute;
-  inset: 0;
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  background: rgba(13, 8, 28, 0.96);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  z-index: 6;
-  text-align: center;
-  padding: 24px;
-}
-
-.video-modal__error-icon {
-  font-size: 34px;
-  line-height: 1;
-}
-
-.video-modal__error-text {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.85);
-  margin: 0;
-  max-width: 320px;
-  line-height: 1.5;
-}
-
-.video-modal__error-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 6px;
-  padding: 8px 18px;
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
-  color: #ffffff;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-.video-modal__error-btn:hover {
-  transform: translateY(-2px);
-  opacity: 0.95;
-}
 

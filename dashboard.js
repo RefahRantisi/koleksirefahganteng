@@ -868,9 +868,6 @@
     const screenCloseBtn = document.getElementById('video-modal-screen-close');
     const titleEl = document.getElementById('video-modal-title');
     const player = document.getElementById('video-modal-player');
-    const loadingEl = document.getElementById('video-modal-loading');
-    const errorEl = document.getElementById('video-modal-error');
-    const errorLink = document.getElementById('video-modal-error-link');
 
     function resolveUrl(src) {
       if (!src) return '';
@@ -894,17 +891,16 @@
       const oldIframe = frameWrap?.querySelector('iframe');
       if (oldIframe) oldIframe.remove();
 
-      if (errorEl) errorEl.style.display = 'none';
-
-      // Hentikan semua video preview di kartu beranda agar GPU/RAM HP fokus memutar video modal
-      document.querySelectorAll('video.feat-video-preview').forEach(v => v.pause());
+      // Hentikan semua video preview di kartu beranda agar bandwidth dan GPU fokus 100% memutar video modal
+      document.querySelectorAll('video.feat-video-preview').forEach(v => {
+        v.pause();
+      });
 
       // Cek apakah video berasal dari link Google Drive
       const driveMatch = src.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || src.match(/\/d\/([a-zA-Z0-9_-]+)/) || src.match(/[?&]id=([a-zA-Z0-9_-]+)/);
       const driveId = driveMatch ? driveMatch[1] : null;
 
       if (driveId) {
-        if (loadingEl) loadingEl.style.display = 'flex';
         if (player) {
           player.pause();
           player.removeAttribute('src');
@@ -918,48 +914,32 @@
         iframe.style.border = 'none';
         iframe.setAttribute('allow', 'autoplay; fullscreen');
         iframe.setAttribute('allowfullscreen', 'true');
-        iframe.onload = () => { if (loadingEl) loadingEl.style.display = 'none'; };
         frameWrap?.appendChild(iframe);
       } else {
         if (player) {
-          if (loadingEl) loadingEl.style.display = 'flex';
           player.style.display = 'block';
           player.setAttribute('playsinline', '');
           player.setAttribute('webkit-playsinline', '');
           player.setAttribute('controls', '');
           player.preload = 'auto';
 
-          const onPlayingOrCanPlay = () => {
-            if (loadingEl) loadingEl.style.display = 'none';
-          };
-          player.oncanplay = onPlayingOrCanPlay;
-          player.onplaying = onPlayingOrCanPlay;
-          player.onwaiting = () => { if (loadingEl) loadingEl.style.display = 'flex'; };
-
           let triedFallback = false;
           player.onerror = () => {
             if (!triedFallback && src !== rawSrc) {
               triedFallback = true;
-              console.warn('Worker playback fallback to original URL:', rawSrc);
               player.src = rawSrc;
               player.load();
               player.play().catch(() => {});
-              return;
-            }
-            if (loadingEl) loadingEl.style.display = 'none';
-            if (errorEl) {
-              errorEl.style.display = 'flex';
-              if (errorLink) errorLink.href = src;
             }
           };
 
-          player.src = src;
-          player.load();
+          if (player.src !== src) {
+            player.src = src;
+            player.load();
+          }
           const p = player.play();
           if (p !== undefined) {
-            p.catch(() => {
-              if (loadingEl) loadingEl.style.display = 'none';
-            });
+            p.catch(() => {});
           }
         }
       }
@@ -975,16 +955,11 @@
       const frameWrap = modal.querySelector('.video-modal__frame-wrap');
       const iframe = frameWrap?.querySelector('iframe');
       if (iframe) iframe.remove();
-      if (loadingEl) loadingEl.style.display = 'none';
-      if (errorEl) errorEl.style.display = 'none';
 
       if (player) {
         player.pause();
         player.removeAttribute('src');
         player.load();
-        player.oncanplay = null;
-        player.onplaying = null;
-        player.onwaiting = null;
         player.onerror = null;
       }
       document.body.classList.remove('modal-open');
@@ -998,16 +973,6 @@
     closeBtn?.addEventListener('click', closeModal);
     screenCloseBtn?.addEventListener('click', closeModal);
     backdrop?.addEventListener('click', closeModal);
-
-    const retryBtn = document.getElementById('video-modal-retry-btn');
-    retryBtn?.addEventListener('click', () => {
-      if (errorEl) errorEl.style.display = 'none';
-      if (player) {
-        if (loadingEl) loadingEl.style.display = 'flex';
-        player.load();
-        player.play().catch(() => {});
-      }
-    });
 
     window.addEventListener('keydown', e => {
       if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();

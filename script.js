@@ -373,6 +373,13 @@ function initVideoPreviewObserver() {
         v.playsInline = true;
         v.setAttribute('playsinline', '');
         v.setAttribute('webkit-playsinline', '');
+
+        // Pada HP (touch screen): jangan putar loop di latar belakang agar GPU dingin dan video modal tidak patah-patah
+        if (window.matchMedia('(pointer: coarse)').matches) {
+          v.pause();
+          return;
+        }
+
         const p = v.play();
         if (p !== undefined) {
           p.catch(() => {});
