@@ -936,7 +936,16 @@
           player.onplaying = onPlayingOrCanPlay;
           player.onwaiting = () => { if (loadingEl) loadingEl.style.display = 'flex'; };
 
+          let triedFallback = false;
           player.onerror = () => {
+            if (!triedFallback && src !== rawSrc) {
+              triedFallback = true;
+              console.warn('Worker playback fallback to original URL:', rawSrc);
+              player.src = rawSrc;
+              player.load();
+              player.play().catch(() => {});
+              return;
+            }
             if (loadingEl) loadingEl.style.display = 'none';
             if (errorEl) {
               errorEl.style.display = 'flex';
@@ -989,6 +998,16 @@
     closeBtn?.addEventListener('click', closeModal);
     screenCloseBtn?.addEventListener('click', closeModal);
     backdrop?.addEventListener('click', closeModal);
+
+    const retryBtn = document.getElementById('video-modal-retry-btn');
+    retryBtn?.addEventListener('click', () => {
+      if (errorEl) errorEl.style.display = 'none';
+      if (player) {
+        if (loadingEl) loadingEl.style.display = 'flex';
+        player.load();
+        player.play().catch(() => {});
+      }
+    });
 
     window.addEventListener('keydown', e => {
       if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
