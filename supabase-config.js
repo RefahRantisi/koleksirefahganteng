@@ -10,8 +10,8 @@ window.PDD_SUPABASE_CONFIG = {
 
   // Endpoint Cloudflare Worker untuk upload (URL-nya publik, tidak sensitif)
   r2WorkerUploadUrl: 'https://koleksirefahganteng.refah-rants.workers.dev/upload',
-  // Base URL publik R2 untuk preview video & gambar
-  r2PublicUrl: 'https://pub-b13ea9401df94ae1b5b0922102aee9ae.r2.dev',
+  // Base URL publik Cloudflare Worker untuk streaming video & gambar (Anti-blokir ISP & HTTP Range 206)
+  r2PublicUrl: 'https://koleksirefahganteng.refah-rants.workers.dev',
   // Endpoint Vercel Serverless Function untuk token upload (bisa diakses dari online maupun lokal)
   tokenApiUrl: 'https://koleksirefahganteng.vercel.app/api/get-upload-token',
 

@@ -12,6 +12,20 @@ function requireSupabase() {
   if (!supabaseClient) throw new Error('Isi URL dan anon key Supabase di supabase-config.js terlebih dahulu.');
 }
 
+// Helper untuk mengatasi pemblokiran *.r2.dev oleh operator seluler Indonesia (DNS poisoning)
+// dan mengaktifkan video streaming instan (HTTP Range 206) via Cloudflare Worker
+function resolveMediaUrl(url) {
+  if (!url || typeof url !== 'string') return '';
+  const r2Match = url.match(/^https?:\/\/[a-zA-Z0-9_-]+\.r2\.dev\/(.+)$/);
+  if (r2Match) {
+    const workerOrigin = (window.PDD_SUPABASE_CONFIG?.r2PublicUrl || 'https://koleksirefahganteng.refah-rants.workers.dev').replace(/\/$/, '');
+    return `${workerOrigin}/${r2Match[1]}`;
+  }
+  return url;
+}
+window.resolveMediaUrl = resolveMediaUrl;
+
+
 function getLocalFeaturedMap() {
   try {
     return JSON.parse(localStorage.getItem('pdd_featured_works') || '{}');
@@ -181,7 +195,8 @@ function renderPortfolio() {
         const isReversed = index % 2 !== 0;
         const toolNames = getWorkToolNames(work);
         const toolsBadges = toolNames.map(name => `<span class="feat-tool-tag">${escapeHtml(name)}</span>`).join('');
-        const videoSrc = escapeHtml(work.r2_url || '');
+        const rawVideoSrc = work.r2_url || '';
+        const videoSrc = escapeHtml(resolveMediaUrl(rawVideoSrc));
         const num = String(index + 1).padStart(2, '0');
         const desc = work.description ? escapeHtml(work.description) : 'Karya video dokumentasi dengan teknik sinematik yang kuat.';
 
@@ -192,7 +207,7 @@ function renderPortfolio() {
             const thumbUrl = `https://drive.google.com/thumbnail?id=${fId}&sz=w1200`;
             videoPreviewHtml = `<img class="feat-video-preview" src="${thumbUrl}" alt="${escapeHtml(work.title || 'Video')}" loading="lazy" referrerpolicy="no-referrer" onerror="if(!this.dataset.triedLh3){ this.dataset.triedLh3='1'; this.src='https://lh3.googleusercontent.com/d/${fId}'; }">`;
           } else {
-            videoPreviewHtml = `<video class="feat-video-preview" src="${videoSrc}" preload="metadata" muted playsinline loop autoplay></video>`;
+            videoPreviewHtml = `<video class="feat-video-preview" data-src="${videoSrc}" preload="metadata" muted playsinline loop></video>`;
           }
         }
 
@@ -232,6 +247,7 @@ function renderPortfolio() {
           ${isReversed ? captionCard + mediaCard : mediaCard + captionCard}
         </div>`;
       }).join('');
+      initVideoPreviewObserver();
     }
   }
 
@@ -318,6 +334,79 @@ function renderPortfolio() {
 
   window.dispatchEvent(new CustomEvent('pdd-portfolio-rendered'));
 }
+
+// ── Smart Video Viewport Observer ─────────────────────────────
+// Menghemat RAM & GPU di HP: hanya putar preview saat video masuk layar,
+// dan segera pause saat keluar layar atau saat modal terbuka.
+let videoPreviewObserver = null;
+function initVideoPreviewObserver() {
+  if (videoPreviewObserver) {
+    videoPreviewObserver.disconnect();
+  }
+  const videos = document.querySelectorAll('video.feat-video-preview');
+  if (!videos.length) return;
+
+  if (!('IntersectionObserver' in window)) {
+    videos.forEach(v => {
+      if (v.dataset.src && !v.src) v.src = v.dataset.src;
+    });
+    return;
+  }
+
+  videoPreviewObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const v = entry.target;
+      // Jangan putar preview jika modal video sedang terbuka
+      const isModalOpen = document.getElementById('video-modal')?.classList.contains('is-open');
+      if (isModalOpen) {
+        v.pause();
+        return;
+      }
+
+      if (entry.isIntersecting) {
+        if (v.dataset.src && !v.src) {
+          v.src = v.dataset.src;
+          v.load();
+        }
+        v.muted = true;
+        v.defaultMuted = true;
+        v.playsInline = true;
+        v.setAttribute('playsinline', '');
+        v.setAttribute('webkit-playsinline', '');
+        const p = v.play();
+        if (p !== undefined) {
+          p.catch(() => {});
+        }
+      } else {
+        v.pause();
+      }
+    });
+  }, {
+    threshold: 0.2,
+    rootMargin: '60px 0px'
+  });
+
+  videos.forEach(v => videoPreviewObserver.observe(v));
+}
+
+window.triggerVideoPreviews = function() {
+  const isModalOpen = document.getElementById('video-modal')?.classList.contains('is-open');
+  if (isModalOpen) return;
+
+  document.querySelectorAll('video.feat-video-preview').forEach(v => {
+    const rect = v.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      if (v.dataset.src && !v.src) {
+        v.src = v.dataset.src;
+        v.load();
+      }
+      v.play().catch(() => {});
+    } else {
+      v.pause();
+    }
+  });
+};
+
 
 function extractDriveFileId(value) {
   if (!value) return null;
@@ -809,7 +898,11 @@ async function uploadToR2Worker(file, onProgress) {
   }
 
   // 2. TAHAP UPLOAD KE CLOUDFLARE R2 (Menggunakan binary stream dari memori)
-  const targetUrl = workerUrl + (workerUrl.includes('?') ? '&' : '?') + 'filename=' + encodeURIComponent(file.name || 'upload.mp4');
+  let safeFileName = file.name || 'video.mp4';
+  if (mimeType.startsWith('video/') && !safeFileName.toLowerCase().match(/\.(mp4|webm|mov|mkv)$/)) {
+    safeFileName += '.mp4';
+  }
+  const targetUrl = workerUrl + (workerUrl.includes('?') ? '&' : '?') + 'filename=' + encodeURIComponent(safeFileName);
 
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
@@ -818,6 +911,7 @@ async function uploadToR2Worker(file, onProgress) {
     // Kirim token otorisasi dan Content-Type media langsung
     request.setRequestHeader('Authorization', `Bearer ${uploadToken}`);
     request.setRequestHeader('Content-Type', mimeType);
+    request.setRequestHeader('X-File-Name', encodeURIComponent(safeFileName));
 
     request.upload.addEventListener('progress', event => {
       if (!event.lengthComputable) return;

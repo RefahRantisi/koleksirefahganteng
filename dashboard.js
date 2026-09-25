@@ -392,6 +392,8 @@
 
   /* ══ 9B. LUXURY FEATURED GLASS CARD 3D TILT & SPOTLIGHT ════════ */
   function initFeaturedCardEffects() {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+
     document.addEventListener('mousemove', e => {
       const card = e.target.closest('.feat-item.glass-card');
       if (!card) return;
@@ -866,22 +868,46 @@
     const screenCloseBtn = document.getElementById('video-modal-screen-close');
     const titleEl = document.getElementById('video-modal-title');
     const player = document.getElementById('video-modal-player');
+    const loadingEl = document.getElementById('video-modal-loading');
+    const errorEl = document.getElementById('video-modal-error');
+    const errorLink = document.getElementById('video-modal-error-link');
 
-    function openModal(src, title) {
-      if (!src) return;
+    function resolveUrl(src) {
+      if (!src) return '';
+      if (typeof window.resolveMediaUrl === 'function') {
+        return window.resolveMediaUrl(src);
+      }
+      const r2Match = src.match(/^https?:\/\/[a-zA-Z0-9_-]+\.r2\.dev\/(.+)$/);
+      if (r2Match) {
+        const workerOrigin = (window.PDD_SUPABASE_CONFIG?.r2PublicUrl || 'https://koleksirefahganteng.refah-rants.workers.dev').replace(/\/$/, '');
+        return `${workerOrigin}/${r2Match[1]}`;
+      }
+      return src;
+    }
+
+    function openModal(rawSrc, title) {
+      if (!rawSrc) return;
+      const src = resolveUrl(rawSrc);
+
       if (titleEl) titleEl.textContent = title || 'Video';
       const frameWrap = modal.querySelector('.video-modal__frame-wrap');
       const oldIframe = frameWrap?.querySelector('iframe');
       if (oldIframe) oldIframe.remove();
+
+      if (errorEl) errorEl.style.display = 'none';
+
+      // Hentikan semua video preview di kartu beranda agar GPU/RAM HP fokus memutar video modal
+      document.querySelectorAll('video.feat-video-preview').forEach(v => v.pause());
 
       // Cek apakah video berasal dari link Google Drive
       const driveMatch = src.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || src.match(/\/d\/([a-zA-Z0-9_-]+)/) || src.match(/[?&]id=([a-zA-Z0-9_-]+)/);
       const driveId = driveMatch ? driveMatch[1] : null;
 
       if (driveId) {
+        if (loadingEl) loadingEl.style.display = 'flex';
         if (player) {
           player.pause();
-          player.src = '';
+          player.removeAttribute('src');
           player.style.display = 'none';
         }
         const iframe = document.createElement('iframe');
@@ -892,13 +918,40 @@
         iframe.style.border = 'none';
         iframe.setAttribute('allow', 'autoplay; fullscreen');
         iframe.setAttribute('allowfullscreen', 'true');
+        iframe.onload = () => { if (loadingEl) loadingEl.style.display = 'none'; };
         frameWrap?.appendChild(iframe);
       } else {
         if (player) {
+          if (loadingEl) loadingEl.style.display = 'flex';
           player.style.display = 'block';
+          player.setAttribute('playsinline', '');
+          player.setAttribute('webkit-playsinline', '');
+          player.setAttribute('controls', '');
+          player.preload = 'auto';
+
+          const onPlayingOrCanPlay = () => {
+            if (loadingEl) loadingEl.style.display = 'none';
+          };
+          player.oncanplay = onPlayingOrCanPlay;
+          player.onplaying = onPlayingOrCanPlay;
+          player.onwaiting = () => { if (loadingEl) loadingEl.style.display = 'flex'; };
+
+          player.onerror = () => {
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (errorEl) {
+              errorEl.style.display = 'flex';
+              if (errorLink) errorLink.href = src;
+            }
+          };
+
           player.src = src;
           player.load();
-          player.play().catch(() => {});
+          const p = player.play();
+          if (p !== undefined) {
+            p.catch(() => {
+              if (loadingEl) loadingEl.style.display = 'none';
+            });
+          }
         }
       }
 
@@ -913,11 +966,24 @@
       const frameWrap = modal.querySelector('.video-modal__frame-wrap');
       const iframe = frameWrap?.querySelector('iframe');
       if (iframe) iframe.remove();
+      if (loadingEl) loadingEl.style.display = 'none';
+      if (errorEl) errorEl.style.display = 'none';
+
       if (player) {
         player.pause();
-        player.src = '';
+        player.removeAttribute('src');
+        player.load();
+        player.oncanplay = null;
+        player.onplaying = null;
+        player.onwaiting = null;
+        player.onerror = null;
       }
       document.body.classList.remove('modal-open');
+
+      // Lanjutkan kembali preview video yang terlihat di layar
+      if (typeof window.triggerVideoPreviews === 'function') {
+        window.triggerVideoPreviews();
+      }
     }
 
     closeBtn?.addEventListener('click', closeModal);

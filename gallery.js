@@ -40,6 +40,18 @@
     return match ? match[1] : (/^[a-zA-Z0-9_-]{10,}$/.test(input) ? input : null);
   }
 
+  // Bypass blokir *.r2.dev oleh ISP Indonesia & aktifkan HTTP Range streaming (206)
+  function resolveMediaUrl(url) {
+    if (!url || typeof url !== 'string') return '';
+    const r2Match = url.match(/^https?:\/\/[a-zA-Z0-9_-]+\.r2\.dev\/(.+)$/);
+    if (r2Match) {
+      const workerOrigin = (window.PDD_SUPABASE_CONFIG?.r2PublicUrl || 'https://koleksirefahganteng.refah-rants.workers.dev').replace(/\/$/, '');
+      return `${workerOrigin}/${r2Match[1]}`;
+    }
+    return url;
+  }
+  window.resolveMediaUrl = resolveMediaUrl;
+
   function extractDriveFolderId(value) {
     if (!value) return null;
     const input = value.trim();
@@ -99,18 +111,30 @@
       videoViewportObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           const video = entry.target;
+          const isModalOpen = document.getElementById('video-modal')?.classList.contains('is-open');
+          if (isModalOpen) {
+            video.pause();
+            return;
+          }
+
           if (entry.isIntersecting) {
             // Lazy load video src if stored in data-lazy-src
             if (video.dataset.lazySrc && !video.src) {
               video.src = video.dataset.lazySrc;
               video.load();
             }
-            video.play().catch(() => {});
+            video.muted = true;
+            video.defaultMuted = true;
+            video.playsInline = true;
+            video.setAttribute('playsinline', '');
+            video.setAttribute('webkit-playsinline', '');
+            const p = video.play();
+            if (p !== undefined) p.catch(() => {});
           } else {
             video.pause();
           }
         });
-      }, { threshold: 0.15, rootMargin: '100px 0px' });
+      }, { threshold: 0.2, rootMargin: '60px 0px' });
     }
     return videoViewportObserver;
   }
@@ -133,7 +157,8 @@
 
     if (!isPhoto) {
       // ── Video Item ──
-      const videoSrc = escapeHtml(work.r2_url || '');
+      const rawVideoSrc = work.r2_url || '';
+      const videoSrc = escapeHtml(resolveMediaUrl(rawVideoSrc));
       const desc = work.description ? escapeHtml(work.description) : 'Karya video dokumentasi dengan teknik sinematik yang kuat.';
 
       let videoPreviewHtml = '';
@@ -649,21 +674,32 @@
     const screenClose = document.getElementById('video-modal-screen-close');
     const titleEl   = document.getElementById('video-modal-title');
     const player    = document.getElementById('video-modal-player');
+    const loadingEl = document.getElementById('video-modal-loading');
+    const errorEl   = document.getElementById('video-modal-error');
+    const errorLink = document.getElementById('video-modal-error-link');
 
-    function open(src, title) {
-      if (!src) return;
+    function open(rawSrc, title) {
+      if (!rawSrc) return;
+      const src = resolveMediaUrl(rawSrc);
+
       if (titleEl) titleEl.textContent = title || 'Video';
       const frameWrap = modal.querySelector('.video-modal__frame-wrap');
       const oldIframe = frameWrap?.querySelector('iframe');
       if (oldIframe) oldIframe.remove();
 
+      if (errorEl) errorEl.style.display = 'none';
+
+      // Hentikan video preview di background
+      document.querySelectorAll('video.feat-video-preview').forEach(v => v.pause());
+
       const driveMatch = src.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || src.match(/\/d\/([a-zA-Z0-9_-]+)/) || src.match(/[?&]id=([a-zA-Z0-9_-]+)/);
       const driveId = driveMatch ? driveMatch[1] : null;
 
       if (driveId) {
+        if (loadingEl) loadingEl.style.display = 'flex';
         if (player) {
           player.pause();
-          player.src = '';
+          player.removeAttribute('src');
           player.style.display = 'none';
         }
         const iframe = document.createElement('iframe');
@@ -674,13 +710,40 @@
         iframe.style.border = 'none';
         iframe.setAttribute('allow', 'autoplay; fullscreen');
         iframe.setAttribute('allowfullscreen', 'true');
+        iframe.onload = () => { if (loadingEl) loadingEl.style.display = 'none'; };
         frameWrap?.appendChild(iframe);
       } else {
         if (player) {
+          if (loadingEl) loadingEl.style.display = 'flex';
           player.style.display = 'block';
+          player.setAttribute('playsinline', '');
+          player.setAttribute('webkit-playsinline', '');
+          player.setAttribute('controls', '');
+          player.preload = 'auto';
+
+          const onPlayingOrCanPlay = () => {
+            if (loadingEl) loadingEl.style.display = 'none';
+          };
+          player.oncanplay = onPlayingOrCanPlay;
+          player.onplaying = onPlayingOrCanPlay;
+          player.onwaiting = () => { if (loadingEl) loadingEl.style.display = 'flex'; };
+
+          player.onerror = () => {
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (errorEl) {
+              errorEl.style.display = 'flex';
+              if (errorLink) errorLink.href = src;
+            }
+          };
+
           player.src = src;
           player.load();
-          player.play().catch(() => {});
+          const p = player.play();
+          if (p !== undefined) {
+            p.catch(() => {
+              if (loadingEl) loadingEl.style.display = 'none';
+            });
+          }
         }
       }
 
@@ -695,8 +758,31 @@
       const frameWrap = modal.querySelector('.video-modal__frame-wrap');
       const iframe = frameWrap?.querySelector('iframe');
       if (iframe) iframe.remove();
-      if (player) { player.pause(); player.src = ''; }
+      if (loadingEl) loadingEl.style.display = 'none';
+      if (errorEl) errorEl.style.display = 'none';
+
+      if (player) {
+        player.pause();
+        player.removeAttribute('src');
+        player.load();
+        player.oncanplay = null;
+        player.onplaying = null;
+        player.onwaiting = null;
+        player.onerror = null;
+      }
       document.body.classList.remove('modal-open');
+
+      // Lanjutkan kembali preview video di viewport
+      document.querySelectorAll('video.feat-video-preview').forEach(v => {
+        const rect = v.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          if (v.dataset.lazySrc && !v.src) {
+            v.src = v.dataset.lazySrc;
+            v.load();
+          }
+          v.play().catch(() => {});
+        }
+      });
     }
 
     closeBtn?.addEventListener('click', close);
